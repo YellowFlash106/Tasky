@@ -57,7 +57,6 @@ export async function registerUser(req, res){
     }
 }
 
-
 // Login User
 export async function loginUser(req, res) {
     const { email, password} = req.body;
@@ -86,7 +85,7 @@ export async function loginUser(req, res) {
         }
 
         const token = createToken(user._id);
-        return res.status(400).json({
+        return res.status(200).json({
         success : true, 
         token, 
         user : { id: user._id, name: user.name, email: user.email}
