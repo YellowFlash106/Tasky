@@ -33,7 +33,7 @@ const Sidebar = ({user, tasks}) => {
             isMobile ? "justify-start" : "lg:justify-start"
           ].join(" ")}  onClick={() => setMobileOpen(false)}>
             <span className={LINK_CLASSES.icon}>{icon}</span>
-            <span className={`${isMobile ? "block" : "hidden lg:block"} ${LINK_CLASSES} `}> {text}</span>
+            <span className={`${isMobile ? "block" : "hidden lg:block"} ${LINK_CLASSES.text} `}> {text}</span>
 
           </NavLink>
         </li>

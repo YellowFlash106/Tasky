@@ -4,6 +4,9 @@ import Layout from './components/Layout';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Dashboard from './pages/Dashboard';
+import Pending from './pages/Pending';
+import CompletePage from './pages/CompletePage';
+import Profile from './components/Profile';
 
 const App = () => {
   const navigate = useNavigate();
@@ -72,6 +75,9 @@ const App = () => {
 
     <Route element={currentUser ? <ProtectedLayout/> : <Navigate to='/login' replace /> }>
     <Route path='/' element={<Dashboard />} />
+    <Route path='/pending' element={<Pending />} />
+    <Route path='/complete' element={<CompletePage />} />
+    <Route path='/profile' element={<Profile user={currentUser} setCurrUser={setCurrUser} onLogout={handleLogout} />} />
     </Route>
 
     <Route path="*" element={<Navigate to={currentUser ? "/" : "/login"} replace /> } />

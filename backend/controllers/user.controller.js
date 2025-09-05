@@ -130,21 +130,23 @@ export async function updateProfile(req, res) {
       })
     }
 
-    try {
-        const exists = await User.findOne({ email, _id:{ $ne: req.user.id }});
-          if(!exists){
-            return res.status(400).json({
-            success : false,
-            message : "Email is already used!"
-            })
-          }
+  try {
+    // check if another user already uses this email
+    const exists = await User.findOne({ email, _id: { $ne: req.user._id } });
+    if (exists) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already used!"
+      });
+    }
 
-        const user = await User.findByIdAndUpdate(
-            req.user.id,
-            {name, email},
-            {new: true, runValidator: true, select:"name email"}
-        );
-        res.json({ success: true, user});
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, email },
+      { new: true, runValidators: true }
+    ).select("name email");
+
+    res.json({ success: true, user });
 
     } catch (error) {
         console.log('Error in updateProfile Controller',error);
