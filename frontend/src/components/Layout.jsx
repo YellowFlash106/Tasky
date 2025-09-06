@@ -17,7 +17,14 @@ const Layout = ({onLogout, user}) => {
 
     try {
       const token = localStorage.getItem('token');
-      if(!token) throw new Error('Token not found');
+      if (!token) {
+        // don't throw here — handle missing token gracefully by setting error
+        setError('Token not found');
+        // trigger logout to clear any stale state and redirect to login
+        if (typeof onLogout === 'function') onLogout();
+        setLoading(false);
+        return;
+      }
 
       const { data  } = await axios.get('http://localhost:4000/api/tasks/gp', {
         headers: {

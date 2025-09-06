@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
-import { BACK_BUTTON, FULL_BUTTON, INPUTWRAPPER, personalFields, SECTION_WRAPPER } from '../assets/dummy'
-import { ChevronLeft, Save, UserCircle } from 'lucide-react'
+import { BACK_BUTTON, DANGER_BTN, FULL_BUTTON, INPUTWRAPPER, personalFields, SECTION_WRAPPER, securityFields } from '../assets/dummy'
+import { ChevronLeft, Lock, LogOut, Save, Shield, UserCircle } from 'lucide-react'
 import { data, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -11,9 +11,10 @@ const API_URL = "http://localhost:4000";
 
 const Profile = ({setCurrUser, onLogout}) => {
 
-    const [profile, setProfile] = useState({name:"", email:""})
-    const [passwords, setPasswords] = useState({current:"", new:"", confirm:""});
-    const navigate = useNavigate();
+  const [profile, setProfile] = useState({name:"", email:""})
+  const [passwords, setPasswords] = useState({current:"", new:"", confirm:""});
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const navigate = useNavigate();
 
     useEffect(() => {
      const token = localStorage.getItem("token");
@@ -48,6 +49,35 @@ const Profile = ({setCurrUser, onLogout}) => {
       }
     }
     
+  const changePassword = async (e) => {
+    e.preventDefault();
+    if (passwords.new !== passwords.confirm) {
+      return toast.error("Password do not match")
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) return toast.error('Not authenticated');
+    if (passwords.new.length < 6) return toast.error('Password must be at least 6 characters');
+
+    try {
+      setPwdLoading(true);
+      const { data } = await axios.put(
+        `${API_URL}/api/user/password`,
+        { currPassword: passwords.current, newPassword: passwords.new },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        toast.success("Password changed successfully");
+        setPasswords({ current: "", new: "", confirm: "" })
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Password change failed");
+    } finally {
+      setPwdLoading(false);
+    }
+  }
     
 
   return (
@@ -70,12 +100,12 @@ const Profile = ({setCurrUser, onLogout}) => {
           </div>
           <div className='grid grid-cols-2 gap-8'>
             <section className={SECTION_WRAPPER}>
-             <div className='flex items-center gap-2 mb-6'>
-            <UserCircle className="text-purple-500 size-5 " />
-            <h2 className='text-xl font-semibold text-gray-800'>Personal Information</h2>
-             </div>
+            <div className='flex items-center gap-2 mb-6'>
+           <UserCircle className="text-purple-500 size-5 " />
+           <h2 className='text-xl font-semibold text-gray-800'>Personal Information</h2>
+            </div>
 
-             {/* Personal info name, email */}
+            {/* Personal info name, email */}
              <form onSubmit={saveProfile} className='space-y-4'>
              {personalFields.map(({name, type, placeholder, icon: Icon}) =>(
              <div key={name} className={INPUTWRAPPER}>
@@ -91,12 +121,43 @@ const Profile = ({setCurrUser, onLogout}) => {
              </button>
              </form>
             </section>
-          </div>
 
-        </div>
-    </div>
+            <section className={SECTION_WRAPPER}>
+             <div className='flex items-center gap-2 mb-6'>
+            <Shield className="text-purple-500 size-5 " />
+            <h2 className='text-xl font-semibold text-gray-800'>Security </h2>
+             </div>
+
+             <form onSubmit={changePassword} className='space-y-4'>
+             {securityFields.map(({name, placeholder}) => (
+            <div key={name} className={INPUTWRAPPER}>
+                <Lock className='text-purple-500 size-5 mr-2 '/>
+                <input  type="password" placeholder={placeholder} value={passwords[name]}
+                onChange={(e) => setPasswords({...passwords, [name]:e.target.value})} 
+                className='w-full focus:outline-none text-sm ' required
+                />
+              </div>
+             ))}
+              <button type='submit' className={FULL_BUTTON}>
+                <Shield className="size-4" />Change password
+             </button>
+
+             <div className='mt-8 pt-6 border-t border-purple-100'>
+             <h3 className='text-red-600 font-semibold mb-4 flex items-center gap-2'>
+             <LogOut className='size-4' /> Danger Zone
+             </h3>
+             <button className={DANGER_BTN} onClick={onLogout}>
+                Logout
+               </button>
+              </div>
+             </form>
+            </section>
+           </div>
+          </div>
+         </div>
     </>
   )
 }
 
 export default Profile
+//  3 : 32
